@@ -28,9 +28,9 @@ public class EventController {
     private UserRepository userRepository;
 
     @CrossOrigin(origins = "*", allowedHeaders = "*")
-    @PostMapping
-    public ResponseEntity saveEvent(@RequestBody EventRequestDTO data){
-        User user = userRepository.findById(data.userId())
+    @PostMapping("/user/{userId}/events")
+    public ResponseEntity saveUserEvent(@PathVariable Long userId, @RequestBody EventRequestDTO data){
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + data.userId()));
 
         if (hasOverlappingEvents(user.getId(), data.start(), data.end())) {
@@ -74,12 +74,25 @@ public class EventController {
     @CrossOrigin(origins = "*", allowedHeaders = "*")
     @DeleteMapping("/{id}")
     public ResponseEntity deleteEvent(@PathVariable Long id){
-        Event eventToDelete = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Event not found with id: " + id));
+        Optional<Event> eventOptional = repository.findById(id);
 
-        repository.delete(eventToDelete);
+        if (eventOptional.isPresent()) {
+            Event eventToDelete = eventOptional.get();
 
-        return ResponseEntity.ok().body("Event successfully deleted");
+            // Remova o evento da lista de eventos do usuário
+            User user = eventToDelete.getUser();
+            if (user != null) {
+                user.getEvents().remove(eventToDelete);
+                userRepository.save(user);
+            }
+
+            // Agora, exclua o evento
+            repository.delete(eventToDelete);
+
+            return ResponseEntity.ok().body("Event successfully deleted");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
 

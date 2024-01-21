@@ -21,17 +21,15 @@ public class Event {
     private Long id;
 
     private String title;
-    private String description;
     private LocalDateTime start;
     private LocalDateTime end;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
     public Event(EventRequestDTO data, User user) {
         this.title = data.title();
-        this.description = data.description();
         this.start = data.start();
         this.end = data.end();
         this.user = user;
@@ -40,10 +38,6 @@ public class Event {
     public void updateDataEvent(EventRequestDTO data) {
         if (data.title() != null) {
             this.title = data.title();
-        }
-
-        if (data.description() != null) {
-            this.description = data.description();
         }
 
         if (data.start() != null) {

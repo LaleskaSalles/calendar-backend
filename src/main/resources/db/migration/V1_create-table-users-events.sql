@@ -7,9 +7,8 @@ create table users(
 create table events(
                        id int AUTO_INCREMENT primary KEY ,
                        title varchar(50) not null,
-                       description varchar(255),
-                       start datetime,
-                       end datetime,
+                       start datetime not null,
+                       end datetime not null,
                        user_id integer not null,
                        foreign key (user_id) references users(id)
 );
