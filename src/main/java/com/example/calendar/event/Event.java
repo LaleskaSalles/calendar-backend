@@ -37,7 +37,7 @@ public class Event {
         this.user = user;
     }
 
-    public void updateDataEvent(EventRequestDTO data, User user) {
+    public void updateDataEvent(EventRequestDTO data) {
         if (data.title() != null) {
             this.title = data.title();
         }
@@ -53,8 +53,6 @@ public class Event {
         if (data.end() != null) {
             this.end = data.end();
         }
-
-        this.user = user;
     }
 
 }
