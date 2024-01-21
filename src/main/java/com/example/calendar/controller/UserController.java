@@ -1,5 +1,8 @@
 package com.example.calendar.controller;
 
+import com.example.calendar.event.Event;
+import com.example.calendar.event.EventRepository;
+import com.example.calendar.event.EventResponseDTO;
 import com.example.calendar.security.TokenService;
 import com.example.calendar.user.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,11 +22,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping()
+@RequestMapping("/user")
 public class UserController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private EventRepository eventRepository;
 
     @Autowired
     private UserRepository repository;
@@ -32,7 +38,7 @@ public class UserController {
     private TokenService tokenService;
 
     @CrossOrigin(origins = "*", allowedHeaders = "*")
-    @PostMapping("/user/login")
+    @PostMapping("/login")
     public ResponseEntity login(@RequestBody UserRequestDTO data) {
         try {
             var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
@@ -50,7 +56,7 @@ public class UserController {
         }
     }
     @CrossOrigin(origins = "*", allowedHeaders = "*")
-    @PostMapping("/user/register")
+    @PostMapping("/register")
     public ResponseEntity registerUser(@RequestBody UserRequestDTO data){
         try{
             if(this.repository.findByLogin(data.login()) != null){
@@ -79,6 +85,26 @@ public class UserController {
         if (userOptional.isPresent()) {
             UserResponseDTO userResponseDTO = new UserResponseDTO(userOptional.get());
             return ResponseEntity.ok(userResponseDTO);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @CrossOrigin(origins = "*", allowedHeaders = "*")
+    @GetMapping("/{id}/events")
+    public ResponseEntity<List<EventResponseDTO>> getUserEvents(@PathVariable Long id) {
+        Optional<User> userOptional = repository.findById(id);
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            List<Event> userEvents = eventRepository.findByUser(user);
+
+            List<EventResponseDTO> eventResponseDTOs = userEvents.stream()
+                    .map(EventResponseDTO::new)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(eventResponseDTOs);
         } else {
             return ResponseEntity.notFound().build();
         }
