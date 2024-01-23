@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("events")
@@ -65,10 +64,16 @@ public class EventController {
     }
 
     @CrossOrigin(origins = "*", allowedHeaders = "*")
-    @GetMapping
-    public List<EventResponseDTO> getAll(){
-        List<EventResponseDTO> eventList = repository.findAll().stream().map(EventResponseDTO::new).collect(Collectors.toList());
-        return eventList;
+    @GetMapping("/{id}")
+    public ResponseEntity<EventResponseDTO> getEventById(@PathVariable Long id) {
+        Optional<Event> eventOptional = repository.findById(id);
+
+        if (eventOptional.isPresent()) {
+            EventResponseDTO eventResponseDTO = new EventResponseDTO(eventOptional.get());
+            return ResponseEntity.ok(eventResponseDTO);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -78,8 +83,6 @@ public class EventController {
 
         if (eventOptional.isPresent()) {
             Event eventToDelete = eventOptional.get();
-
-            // Remova o evento da lista de eventos do usuário
             User user = eventToDelete.getUser();
             if (user != null) {
                 user.getEvents().remove(eventToDelete);
@@ -118,18 +121,7 @@ public class EventController {
         return false;
     }
 
-    @CrossOrigin(origins = "*", allowedHeaders = "*")
-    @GetMapping("/{id}")
-    public ResponseEntity<EventResponseDTO> getEventById(@PathVariable Long id) {
-        Optional<Event> eventOptional = repository.findById(id);
 
-        if (eventOptional.isPresent()) {
-            EventResponseDTO eventResponseDTO = new EventResponseDTO(eventOptional.get());
-            return ResponseEntity.ok(eventResponseDTO);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
 
 
 }

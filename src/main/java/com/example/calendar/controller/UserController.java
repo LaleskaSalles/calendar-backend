@@ -5,7 +5,6 @@ import com.example.calendar.event.EventRepository;
 import com.example.calendar.event.EventResponseDTO;
 import com.example.calendar.security.TokenService;
 import com.example.calendar.user.*;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +12,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.util.StringUtils;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,9 +41,12 @@ public class UserController {
             var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
             var auth = this.authenticationManager.authenticate(usernamePassword);
 
+            var userDetails = (User) auth.getPrincipal();
             var token = tokenService.generateToken((User) auth.getPrincipal());
+            Long userId = userDetails.getId();
+            String nameUser = userDetails.getUsername();
 
-            return ResponseEntity.ok(new LoginResponseDTO(token));
+            return ResponseEntity.ok(new LoginResponseDTO(token, userId, nameUser));
         } catch (BadCredentialsException e){
             return  ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Incorrect Login or Password");
