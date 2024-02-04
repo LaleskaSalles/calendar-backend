@@ -1,4 +1,4 @@
 package com.example.calendar.user;
 
-public record LoginResponseDTO(String token, Long userId, String nameUser) {
+public record LoginResponseDTO(String token, Long userId) {
 }

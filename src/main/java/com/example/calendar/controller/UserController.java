@@ -44,9 +44,8 @@ public class UserController {
             var userDetails = (User) auth.getPrincipal();
             var token = tokenService.generateToken((User) auth.getPrincipal());
             Long userId = userDetails.getId();
-            String nameUser = userDetails.getUsername();
 
-            return ResponseEntity.ok(new LoginResponseDTO(token, userId, nameUser));
+            return ResponseEntity.ok(new LoginResponseDTO(token, userId));
         } catch (BadCredentialsException e){
             return  ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Incorrect Login or Password");
@@ -73,20 +72,6 @@ public class UserController {
         } catch (Exception ex){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An error occurred");
-        }
-    }
-
-
-    @CrossOrigin(origins = "*", allowedHeaders = "*")
-    @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
-        Optional<User> userOptional = repository.findById(id);
-
-        if (userOptional.isPresent()) {
-            UserResponseDTO userResponseDTO = new UserResponseDTO(userOptional.get());
-            return ResponseEntity.ok(userResponseDTO);
-        } else {
-            return ResponseEntity.notFound().build();
         }
     }
 
